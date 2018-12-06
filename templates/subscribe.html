@@ -1,0 +1,63 @@
+<!doctype <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>subscribe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="myStyle.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="main.js"></script>
+</head>
+<body>
+        <style>
+        html, body, h1, h2, h3, h4, h5, h6 {
+          font-family: "Comic Sans MS", cursive, sans-serif;
+        }
+        </style>
+    <h1><div class="w3-container w3-blue">
+            <div class="w3-panel w3-leftbar w3-fuchsia w3-large w3-serif">   
+               <i> <div class="w3-blue">
+                    <form action="/result" class="form-inline" method="post">
+                    User name:<br>
+                    <input type="text" class="form-control"name="username" value="{{request.form.username}}">
+                    <br>
+                    Email id:<br>
+                    <input type="text" class="form-control" name="email_id" value="{{request.form.email_id}}">
+                    <br><br>
+                    <input type="submit" class="btn btn-default"value="Submit">
+                    </form>
+                </i>     
+               <p><i>If you click the "Submit" button, the form-data will be sent to a page called "/result".</i></p>
+            </div>    
+            
+    </h1> 
+    <footer class="w3-container w3-magenta">
+            <p><h1>subscribe and get latest updates</h1></p>
+            <div class="w3-card-2w3-teal ">
+
+                    <div class="w3-container w3-center w3-large ">
+                      <h3>Holders</h3>
+                      <img src="img_avatar3.png" alt="Avatar" style="width:30%">
+                      <h3>Muthumani</h3>
+                    </div> 
+                      <div class="w3-card-2 w3-magenta ">
+
+                            <div class="w3-container w3-center w3-large">
+                              <h3>Holders</h3>
+                              <img src="img_avatar3.png" alt="Avatar" style="width:30%">
+                              <h3>Muthurevanth</h3>
+                            </div>  
+                              <div class="w3-card-2 w3-magenta w3-xxlarge">
+
+                                    <div class="w3-container w3-center w3-large">
+                                      <h3>Holders</h3>
+                                      <img src="img_avatar3.png" alt="Avatar" style="width:30%">
+                                      <h3>Mukeshkumar</h3>
+                                    </div> 
+          </footer>
+   
+</body>
+</html>
