@@ -30,9 +30,11 @@ def retrive(data):
 @app.route('/')
 def home():
 	return render_template('home.html')
+
 @app.route('/subscribe')
 def subscribe():
 	return render_template('subscribe.html')
+
 @app.route('/result',methods=['GET','POST'])
 def result():
 	if request.method=='POST':
@@ -40,10 +42,10 @@ def result():
 		attemped_email_id =request.form['email_id']
 		user_data=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
 		try:
-			user_data.execute('CREATE TABLE user(email char(15))')
+			user_data.execute('CREATE TABLE user(name varchar(20),email varchar(20))')
 		except:
 			pass
-		user_data.execute('INSERT INTO user VALUES(?)',(attemped_email_id,))
+		user_data.execute('INSERT INTO user VALUES(?,?)',(attemped_username,attemped_email_id))
 		ud=user_data.cursor()
 		for row in ud.execute('SELECT email FROM user'):
 			email_list.append(row[0])
@@ -51,12 +53,14 @@ def result():
 		return render_template('result.html')	
 	else:
 		return render_template('subscribe.html')
+		
 @app.route('/send')
 def send():
 	main=create_connection("../tech-feed-publisher-socket/Database/techfeeds.db")
 	msg=Message('hello',sender=email,recipients=email_list)
 	msg.body="Thank you for subscribing to our page \n Here are the links for articles: \n"+ str(retrive(main))
 	mail.send(msg)
+	email_list.pop()
 	return "sent"
 
 email=input("Enter your emailid:")
