@@ -7,8 +7,8 @@ mail=Mail(app)
 def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
 	app.config['MAIL_PORT'] = 465
-	app.config['MAIL_USERNAME'] = email
-	app.config['MAIL_PASSWORD'] = password
+	app.config['MAIL_USERNAME'] = 'test.111.anonymous@gmail.com'
+	app.config['MAIL_PASSWORD'] = 'test111@123'
 	app.config['MAIL_USE_TLS'] = False
 	app.config['MAIL_USE_SSL'] = True
 	mail=Mail(app)
@@ -74,8 +74,6 @@ def send():
 		value.execute('update user set last='+str(feed_vlaue[i][0])+' where last<'+str(feed_vlaue[i][0]))
 		value.commit()
 	return "thank you"
-email=input("Enter your emailid:")
 
-password=getpass.getpass()
 config()
 app.run()
