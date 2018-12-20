@@ -44,7 +44,7 @@ def result():
 	if request.method=='POST':
 		user_data=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
 		try:
-			user_data.execute('CREATE TABLE user(name varchar(20),email varchar(20),time int,last int)')
+			user_data.execute('CREATE TABLE user(name varchar(20),email varchar(50),time int,last int)')
 			print('yes')
 		except:
 			pass
@@ -60,12 +60,12 @@ def send():
 		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[i][0])):
 			min,sec=0,0
 			while True:
-				if sec==user_value[2]:
+				if min==user_value[2]:
 					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
 					break
-				#if sec>59:
-				#	min+=1
-				#	sec=0
+				if sec>59:
+					min+=1
+					sec=0
 				sec+=1
 				time.sleep(1)
 				print('{}min:{}sec'.format(min,sec))
