@@ -25,9 +25,10 @@ def retrive(data,table_name,something_else=''):
 		data=data.execute("select * from "+table_name+something_else)
 		return data.fetchall()
 	
-def mail_sender(user_value,feed_vlaue):
+def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	msg=Message('hello '+user_value[0],sender="feed at",recipients=[user_value[1]])
-	msg.body="Title:"+feed_vlaue[2]+"\nSummary:"+feed_vlaue[3]+'\nLinke:'+feed_vlaue[1]
+	#msg.body="Title:"+feed_vlaue[2]+"\nSummary:"+feed_vlaue[3]+'\nLinke:'+feed_vlaue[1]
+	msg.html=render_template('email_template.html',title1=feed_vlaue1[2],title2=feed_vlaue2[2],summary1=feed_vlaue1[3],summary2=feed_vlaue2[3],feed_link1=feed_vlaue1[1],feed_link2=feed_vlaue2[1])
 	mail.send(msg)
 
 @app.route('/')
@@ -54,25 +55,27 @@ def result():
 		return render_template('subscribe.html')
 @app.route('/send')
 def send():
-	for feed_vlaue in retrive(create_connection('../tech-feed-publisher-socket/Database/techfeeds.db'),'techfeeds'):
-		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[0])):
+	feed_vlaue=retrive(create_connection('../tech-feed-publisher-socket/Database/techfeeds.db'),'techfeeds')
+	for i in range(0,len(feed_vlaue),2):
+		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[i][0])):
 			min,sec=0,0
 			while True:
-				if min==user_value[2]:
-					mail_sender(user_value,feed_vlaue)
+				if sec==user_value[2]:
+					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
 					break
-				if sec>59:
-					min+=1
-					sec=0
+				#if sec>59:
+				#	min+=1
+				#	sec=0
 				sec+=1
 				time.sleep(1)
-				print('{}:{}'.format(min,sec))
+				print('{}min:{}sec'.format(min,sec))
 			print('Done')
 		value=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
-		value.execute('update user set last='+str(feed_vlaue[0])+' where last<'+str(feed_vlaue[0]))
+		value.execute('update user set last='+str(feed_vlaue[i][0])+' where last<'+str(feed_vlaue[i][0]))
 		value.commit()
 	return "thank you"
 email=input("Enter your emailid:")
+
 password=getpass.getpass()
 config()
 app.run()
