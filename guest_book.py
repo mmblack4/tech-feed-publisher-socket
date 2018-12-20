@@ -57,7 +57,7 @@ def result():
 def send():
 	feed_vlaue=retrive(create_connection('../tech-feed-publisher-socket/Database/techfeeds.db'),'techfeeds')
 	for i in range(0,len(feed_vlaue),2):
-		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[i][0])):
+		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[i+1][0])):
 			min,sec=0,0
 			while True:
 				if min==user_value[2]:
@@ -71,7 +71,7 @@ def send():
 				print('{}min:{}sec'.format(min,sec))
 			print('Done')
 		value=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
-		value.execute('update user set last='+str(feed_vlaue[i][0])+' where last<'+str(feed_vlaue[i][0]))
+		value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where last<'+str(feed_vlaue[i+1][0]))
 		value.commit()
 	return "thank you"
 
