@@ -8,7 +8,7 @@ def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
 	app.config['MAIL_PORT'] = 465
 	app.config['MAIL_USERNAME'] = 'test.111.anonymous@gmail.com'
-	app.config['MAIL_PASSWORD'] = 'test111@123'
+	app.config['MAIL_PASSWORD'] = 'test111@123' 
 	app.config['MAIL_USE_TLS'] = False
 	app.config['MAIL_USE_SSL'] = True
 	mail=Mail(app)
@@ -56,23 +56,28 @@ def result():
 @app.route('/send')
 def send():
 	feed_vlaue=retrive(create_connection('../tech-feed-publisher-socket/Database/techfeeds.db'),'techfeeds')
+	users=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
 	for i in range(0,len(feed_vlaue),2):
-		for user_value in retrive(create_connection('../tech-feed-publisher-socket/Database/userdata.db'),'user',' where last<'+str(feed_vlaue[i][0])):
-			min,sec=0,0
-			while True:
-				if min==user_value[2]:
-					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
-					break
-				if sec>59:
-					min+=1
-					sec=0
-				sec+=1
-				time.sleep(1)
-				print('{}min:{}sec'.format(min,sec))
-			print('Done')
-		value=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
-		value.execute('update user set last='+str(feed_vlaue[i][0])+' where last<'+str(feed_vlaue[i][0]))
-		value.commit()
+		maxim=users.execute('select max(time) from user where last='+str(i))
+		maxim=maxim.fetchall()
+		min,sec=0,0
+		while min<maxim[0][0]:
+			if sec==60:
+				min+=1
+				sec=0
+				for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')'):
+					if user_value != '':
+						mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
+						value=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
+						value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')')
+						value.commit()
+						print('Done')
+
+			sec+=1
+			time.sleep(1)
+			print('{}min:{}sec'.format(min,sec))
+		
+
 	return "thank you"
 
 config()
