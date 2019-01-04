@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request,url_for ,redirect
 from flask_mail import Mail,Message
-import sqlite3,getpass,time
+import sqlite3,getpass,time,os
 email,password='',''
 app = Flask(__name__)
+path=os.path.abspath(os.path.dirname(__file__))
 mail=Mail(app)
 def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -15,7 +16,6 @@ def config():
 
 def create_connection(db_file):
 	try:
-
 		data=sqlite3.connect(db_file,check_same_thread=False)
 		return data
 	except:
@@ -42,10 +42,9 @@ def subscribe():
 @app.route('/result',methods=['GET','POST'])
 def result():
 	if request.method=='POST':
-		user_data=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
+		user_data=create_connection(path+'/Database/userdata.db')
 		try:
 			user_data.execute('CREATE TABLE user(name varchar(20),email varchar(50),time int,last int)')
-			print('yes')
 		except:
 			pass
 		user_data.execute('INSERT INTO user VALUES(?,?,?,?)',(request.form['username'],request.form['email_id'],request.form['time'],0))
@@ -55,8 +54,8 @@ def result():
 		return render_template('subscribe.html')
 @app.route('/send')
 def send():
-	feed_vlaue=retrive(create_connection('../tech-feed-publisher-socket/Database/techfeeds.db'),'techfeeds')
-	users=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
+	feed_vlaue=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+	users=create_connection(path+'/Database/userdata.db')
 	for i in range(0,len(feed_vlaue),2):
 		maxim=users.execute('select max(time) from user where last='+str(i))
 		maxim=maxim.fetchall()
@@ -68,7 +67,7 @@ def send():
 				for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')'):
 					if user_value != '':
 						mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
-						value=create_connection('../tech-feed-publisher-socket/Database/userdata.db')
+						value=create_connection(path+'/Database/userdata.db')
 						value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')')
 						value.commit()
 						print('Done')
@@ -76,10 +75,8 @@ def send():
 			sec+=1
 			time.sleep(1)
 			print('{}min:{}sec'.format(min,sec))
-		
-
-
 	return "thank you"
 
-config()
-app.run()
+if __name__== "__main__":
+	config()
+	app.run()
