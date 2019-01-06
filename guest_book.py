@@ -26,7 +26,7 @@ def retrive(data,table_name,something_else=''):
 		return data.fetchall()
 	
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
-	msg=Message('hello '+user_value[0],sender="feed at",recipients=[user_value[1]])
+	msg=Message('hello '+user_value[1],sender="feed at",recipients=[user_value[2]])
 	#msg.body="Title:"+feed_vlaue[2]+"\nSummary:"+feed_vlaue[3]+'\nLinke:'+feed_vlaue[1]
 	msg.html=render_template('email_template.html',title1=feed_vlaue1[2],title2=feed_vlaue2[2],summary1=feed_vlaue1[3],summary2=feed_vlaue2[3],feed_link1=feed_vlaue1[1],feed_link2=feed_vlaue2[1])
 	mail.send(msg)
@@ -44,10 +44,10 @@ def result():
 	if request.method=='POST':
 		user_data=create_connection(path+'/Database/userdata.db')
 		try:
-			user_data.execute('CREATE TABLE user(name varchar(20),email varchar(50),time int,last int)')
+			user_data.execute('CREATE TABLE user(si integer primary key,name varchar(20),email varchar(50),time int,last int)')
 		except:
 			pass
-		user_data.execute('INSERT INTO user VALUES(?,?,?,?)',(request.form['username'],request.form['email_id'],request.form['time'],0))
+		user_data.execute('INSERT INTO user(name,email,time,last) VALUES(?,?,?,?)',(request.form['username'],request.form['email_id'],request.form['time'],0))
 		user_data.commit() #This new 
 		return render_template('result.html')	
 	else:
@@ -76,7 +76,29 @@ def send():
 			time.sleep(1)
 			print('{}min:{}sec'.format(min,sec))
 	return "thank you"
-
+@app.route('/admin')
+def admin():
+	return render_template('adminSignin.html')
+@app.route('/j_acegi_security_check',methods=['GET','POST'])
+def check():
+	if request.method=='POST':
+		if request.form['j_username']=='admin' and request.form['j_password']=='admin':
+			Data=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+			return render_template('db_table.html',data=Data)
+		else:
+			return "please check admin username and password"
+@app.route('/save',methods=['GET','POST'])	
+def add():
+	feed=create_connection(path+'/Database/techfeeds.db')
+	opt=request.form['opt']
+	if opt=='add':
+		feed.execute('insert into techfeeds(feed_links,tags,summary) values(?,?,?)',(request.form['feedLinks'],request.form['tags'],request.form['summary']))		
+	elif opt=='delete':
+		feed.execute('delete from techfeeds where feed_no='+request.form['feedNo'])
+	elif opt=='update':
+		feed.execute("""update techfeeds set feed_links = ? ,tags = ? ,summary = ? where feed_no = ?""",(request.form['feedLinks'],request.form['tags'],request.form['summary'],request.form['feedNo']))
+	feed.commit()
+	return render_template('db_table.html',data=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds'))
 if __name__== "__main__":
 	config()
 	app.run()

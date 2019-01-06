@@ -1,0 +1,174 @@
+<html>
+    <head>
+        <style>
+        
+        .tab-1 {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 70%;
+        }
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+            .container{overflow: hidden}
+            .tab{float: left;}
+            .tab-2{margin-left: 50px}
+            .tab-2 input{display: block;margin-bottom: 10px}
+            tr{transition:all .25s ease-in-out}
+            tr:hover{background-color:#EEE;cursor: pointer}
+        </style>
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
+        <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-indigo.css">
+        </head>
+        <body>
+                <div class="w3-bar w3-black">
+                        <a href="/" class="w3-bar-item w3-button w3-mobile">Home</a>
+                        <a href="#" class="w3-bar-item w3-button w3-mobile">Science</a>
+                        <a href="#" class="w3-bar-item w3-button w3-mobile">Tech</a>
+                        <a href="#" class="w3-bar-item w3-button w3-mobile">Environment</a>
+                        <a href="/admin" class="w3-bar-item w3-button w3-mobile">admin login</a>
+                </div>
+                <div class="container">
+                        <div class="tab tab-1">
+                            <table id="table" border="1" name='table'>
+                                <tr>
+                                    <th>feed_no</th>
+                                    <th>feed_links</th>
+                                    <th>tags</th>
+                                    <th>summary</th>
+                                </tr>
+                                {% for iteam in data %}
+                                <tr>
+                                    <td>{{iteam[0]}}</td>
+                                    <td>{{iteam[1]}}</td>
+                                    <td>{{iteam[2]}}</td>
+                                    <td>{{iteam[3]}}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+            
+                <div class="tab tab-2">
+                    <form  action="/save" method="POST">
+                    feedNo :<input type="number" name="feedNo" id="feedNo" readonly>
+                    feedLinks :<input type="text" name="feedLinks" id="feedLinks">
+                    tags :<input type="text" name="tags" id="tags">
+                    summary :<input type="text" name="summary" id="summary">
+                    <input type="radio" name="opt" value="add" checked>Add
+                    <input type="radio" name="opt" value="delete">Delete
+                    <input type="radio" name="opt" value="update">Update<br><br>
+                    <input type="submit" value="submit">
+                    </form>
+                </div>
+            <script>
+                var rIndex,
+                table = document.getElementById("table");
+        
+                // check the empty input
+                function checkEmptyInput()
+                {
+                    var isEmpty = false,
+                    feedNo = document.getElementById("feedNo").value,
+                    feedLinks = document.getElementById("feedLinks").value,
+                    tags = document.getElementById("tags").value;
+                    summary = document.getElementById("summary").value;
+        
+                if(feedNo === ""){
+                    alert("feedNO Connot Be Empty");
+                    isEmpty = true;
+                }
+                else if(feedLinks === ""){
+                    alert("feedLinks Connot Be Empty");
+                    isEmpty = true;
+                }
+                else if(tags === ""){
+                    alert("tag Connot Be Empty");
+                    isEmpty = true;
+                }
+                else if(summary === ""){
+                    alert("summary conot be Empty");
+                    isEmpty = true
+                }
+                return isEmpty;
+        }
+        
+        // add Row
+        function addHtmlTableRow()
+        {
+            // get the table by id
+            // create a new row and cells
+            // get value from input text
+            // set the values into row cell's
+            if(!checkEmptyInput()){
+            var newRow = table.insertRow(table.length),
+                cell1 = newRow.insertCell(0),
+                cell2 = newRow.insertCell(1),
+                cell3 = newRow.insertCell(2),
+                cell4 = newRow.insertCell(3),
+                feedNo = document.getElementById("feedNo").value,
+                feedLinks = document.getElementById("feedLinks").value,
+                tags = document.getElementById("tags").value;
+                summary = document.getElementById("summary").value;
+        
+            cell1.innerHTML = feedNo;
+            cell2.innerHTML = feedLinks;
+            cell3.innerHTML = tags;
+            cell4.innerHTML = summary
+            // call the function to set the event to the new row
+            selectedRowToInput();
+        }
+        }
+        
+        // display selected row data into input text
+        function selectedRowToInput()
+        {
+            
+            for(var i = 1; i < table.rows.length; i++)
+            {
+                table.rows[i].onclick = function()
+                {
+                  // get the seected row index
+                  rIndex = this.rowIndex;
+                  document.getElementById("feedNo").value = this.cells[0].innerHTML;
+                  document.getElementById("feedLinks").value = this.cells[1].innerHTML;
+                  document.getElementById("tags").value = this.cells[2].innerHTML;
+                  document.getElementById("summary").value = this.cells[3].innerHTML;
+                };
+            }
+        }
+        selectedRowToInput();
+        
+        function editHtmlTbleSelectedRow()
+        {
+            var feedNo = document.getElementById("feedNo").value,
+                feedLinks = document.getElementById("feedLinks").value,
+                tags = document.getElementById("tags").value;
+                summary = document.getElementById("summary").value;
+           if(!checkEmptyInput()){
+            table.rows[rIndex].cells[0].innerHTML = feedNo;
+            table.rows[rIndex].cells[1].innerHTML = feedLinks;
+            table.rows[rIndex].cells[2].innerHTML = tags;
+            table.rows[rIndex].cells[3].innerHTML = summary;
+          }
+        }
+        
+        function removeSelectedRow()
+        {
+            table.deleteRow(rIndex);
+            // clear input text
+            document.getElementById("feedNo").value = "";
+            document.getElementById("feedLinks").value = "";
+            document.getElementById("tags").value = "";
+            document.getElementById("summary").value = "";
+
+        }
+    </script>
+        </body>
+</html>
