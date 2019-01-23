@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request,url_for ,redirect
 from flask_mail import Mail,Message
-import sqlite3,getpass,time,os
+import sqlite3,getpass,time,os,random
 email,password='',''
 app = Flask(__name__)
 path=os.path.abspath(os.path.dirname(__file__))
@@ -24,6 +24,16 @@ def create_connection(db_file):
 def retrive(data,table_name,something_else=''):
 		data=data.execute("select * from "+table_name+something_else)
 		return data.fetchall()
+def randomfetch(data,table_name,something_else=" "):
+	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name+something_else)
+	feeds=feeds.fetchall()
+	ran=random.randrange(feeds[0][1],feeds[0][0])
+	final=data.execute("select * from "+table_name+something_else+"where feed_no="+str(ran))
+	final=final.fetchall()
+	print (final)
+	return final
+	
+
 	
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	msg=Message('hello '+user_value[1],sender="feed at",recipients=[user_value[2]])
@@ -54,7 +64,7 @@ def result():
 		return render_template('subscribe.html')
 @app.route('/send')
 def send():
-	feed_vlaue=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+	feed_vlaue=randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
 	users=create_connection(path+'/Database/userdata.db')
 	for i in range(0,len(feed_vlaue),2):
 		maxim=users.execute('select max(time) from user where last='+str(i))
@@ -64,11 +74,11 @@ def send():
 			if sec==60:
 				min+=1
 				sec=0
-				for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')'):
+				for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')'):
 					if user_value != '':
 						mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
 						value=create_connection(path+'/Database/userdata.db')
-						value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where (last<'+str(feed_vlaue[i+1][0])+' and time='+str(min)+')')
+						value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
 						value.commit()
 						print('Done')
 
