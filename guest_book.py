@@ -24,16 +24,21 @@ def create_connection(db_file):
 def retrive(data,table_name,something_else=''):
 		data=data.execute("select * from "+table_name+something_else)
 		return data.fetchall()
-def randomfetch(data,table_name,something_else=" "):
-	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name+something_else)
+def randomfetch(data,table_name):
+	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name)
 	feeds=feeds.fetchall()
 	ran=random.randrange(feeds[0][1],feeds[0][0])
-	final=data.execute("select * from "+table_name+something_else+"where feed_no="+str(ran))
+	final=data.execute("select * from "+table_name+" where feed_no="+str(ran))
 	final=final.fetchall()
-	print (final)
 	return final
-	
-
+def randsend(data,table_name):
+	feedlist=data.execute("select max(feed_no) from "+table_name)
+	rand_list=list()
+	for i in feedlist.fetchall():
+		rand_list.append(randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds'))
+		
+	print(rand_list)
+	return rand_list
 	
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	msg=Message('hello '+user_value[1],sender="feed at",recipients=[user_value[2]])
@@ -64,7 +69,7 @@ def result():
 		return render_template('subscribe.html')
 @app.route('/send')
 def send():
-	feed_vlaue=randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+	feed_vlaue=randsend(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
 	users=create_connection(path+'/Database/userdata.db')
 	for i in range(0,len(feed_vlaue),2):
 		maxim=users.execute('select max(time) from user where last='+str(i))
@@ -78,7 +83,7 @@ def send():
 					if user_value != '':
 						mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
 						value=create_connection(path+'/Database/userdata.db')
-						value.execute('update user set last='+str(feed_vlaue[i+1][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
+						value.execute('update user set last='+str(feed_vlaue[i][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
 						value.commit()
 						print('Done')
 
