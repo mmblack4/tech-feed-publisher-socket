@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request,url_for ,redirect
 from flask_mail import Mail,Message
 import sqlite3,getpass,time,os,random
-email,password='',''
+
 app = Flask(__name__)
-path=os.path.abspath(os.path.dirname(__file__))
 mail=Mail(app)
+
+userData = sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/userdata.db',check_same_thread=False)
+feedData= sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/techfeeds.db',check_same_thread=False)
+
 def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
 	app.config['MAIL_PORT'] = 465
@@ -14,31 +17,24 @@ def config():
 	app.config['MAIL_USE_SSL'] = True
 	mail=Mail(app)
 
-def create_connection(db_file):
-	try:
-		data=sqlite3.connect(db_file,check_same_thread=False)
-		return data
-	except:
-		print("error while by conneting  to database")
-
 def retrive(data,table_name,something_else=''):
 		data=data.execute("select * from "+table_name+something_else)
 		return data.fetchall()
-def randomfetch(data,table_name):
-	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name)
-	feeds=feeds.fetchall()
-	ran=random.randrange(feeds[0][1],feeds[0][0])
-	final=data.execute("select * from "+table_name+" where feed_no="+str(ran))
-	final=final.fetchall()
-	return final
-def randsend(data,table_name):
-	feedlist=data.execute("select max(feed_no) from "+table_name)
-	rand_list=list()
-	for i in feedlist.fetchall():
-		rand_list.append(randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds'))
+
+# def randsend(data,table_name):
+# 	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name)
+# 	feeds=feeds.fetchall()
+# 	ran=random.randrange(feeds[0][1],feeds[0][0])
+# 	final=data.execute("select * from "+table_name+" where feed_no="+str(ran))
+# 	final=final.fetchall()
+# 	return final
+#def check(ran,username):
+#	try:
+#		userData = create_connection(path+'/Database/userdata.db')
+#		userData.execute('create table history(si int,)')
+#def randsend(data,table_name):
+#	return randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
 		
-	print(rand_list)
-	return rand_list
 	
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	msg=Message('hello '+user_value[1],sender="feed at",recipients=[user_value[2]])
@@ -56,64 +52,70 @@ def subscribe():
 
 @app.route('/result',methods=['GET','POST'])
 def result():
-	if request.method=='POST':
-		user_data=create_connection(path+'/Database/userdata.db')
-		try:
-			user_data.execute('CREATE TABLE user(si integer primary key,name varchar(20),email varchar(50),time int,last int)')
-		except:
-			pass
-		user_data.execute('INSERT INTO user(name,email,time,last) VALUES(?,?,?,?)',(request.form['username'],request.form['email_id'],request.form['time'],0))
-		user_data.commit() #This new 
-		return render_template('result.html')	
-	else:
-		return render_template('subscribe.html')
+	try:
+		userData.execute('CREATE TABLE user(si integer primary key,name varchar(20),email varchar(50),time int,last int)')
+	except:
+		pass
+	userData.execute('INSERT INTO user(name,email,time,last) VALUES(?,?,?,?)',(request.form['username'],request.form['email_id'],request.form['time'],0))
+	userData.commit()
+	return render_template('result.html')	
+
 @app.route('/send')
 def send():
-	feed_vlaue=randsend(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
-	users=create_connection(path+'/Database/userdata.db')
-	for i in range(0,len(feed_vlaue),2):
-		maxim=users.execute('select max(time) from user where last='+str(i))
-		maxim=maxim.fetchall()
-		min,sec=0,0
-		while min<maxim[0][0]:
-			if sec==60:
-				min+=1
-				sec=0
-				for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')'):
-					if user_value != '':
-						mail_sender(user_value,feed_vlaue[i],feed_vlaue[i+1])
-						value=create_connection(path+'/Database/userdata.db')
-						value.execute('update user set last='+str(feed_vlaue[i][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
-						value.commit()
-						print('Done')
+	# feed_vlaue=randsend(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+	# users=create_connection(path+'/Database/userdata.db')
+	# for i in range(0,len(feed_vlaue),2):
+	# 	maxim=users.execute('select max(time) from user where last='+str(i))
+	# 	maxim=maxim.fetchall()
+	# 	min,sec=0,0
+	# 	while min<maxim[0][0]:
+	# 		if sec==60:
+	# 			min+=1
+	# 			sec=0
+	# 			for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')'):
+	# 				if user_value != '':
+	# 					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i])
+	# 					value=create_connection(path+'/Database/userdata.db')
+	# 					value.execute('update user set last='+str(feed_vlaue[i][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
+	# 					value.commit()
+	# 					print('Done')
 
-			sec+=1
-			time.sleep(1)
-			print('{}min:{}sec'.format(min,sec))
+	# 		sec+=1
+	# 		time.sleep(1)
+	# 		print('{}min:{}sec'.format(min,sec))
 	return "thank you"
+
 @app.route('/admin')
 def admin():
 	return render_template('adminSignin.html')
+
 @app.route('/j_acegi_security_check',methods=['GET','POST'])
 def check():
-	if request.method=='POST':
-		if request.form['j_username']=='admin' and request.form['j_password']=='admin':
-			Data=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
-			return render_template('db_table.html',data=Data)
-		else:
-			return "please check admin username and password"
+	if request.form['j_username']=='admin' and request.form['j_password']=='admin':
+		Data=retrive(feedData,'techfeeds')
+		return render_template('db_table.html',data=Data)
+	else:
+		return render_template('adminSignin.html',info="please check username or password")
+
 @app.route('/save',methods=['GET','POST'])	
 def add():
-	feed=create_connection(path+'/Database/techfeeds.db')
 	opt=request.form['opt']
 	if opt=='add':
-		feed.execute('insert into techfeeds(feed_links,tags,summary) values(?,?,?)',(request.form['feedLinks'],request.form['tags'],request.form['summary']))		
+		test=feedData.execute("""select * from techfeeds where feed_links = ?""",[request.form['feedLinks']])
+		if len(test.fetchall()) == 0:
+			feedData.execute('insert into techfeeds(feed_links,tags,summary) values(?,?,?)',(request.form['feedLinks'],request.form['tags'],request.form['summary']))		
+			info = "new feed inserted"
+		else:
+			return render_template('db_table.html',info="feed link already existing",data=retrive(feedData,'techfeeds'))
 	elif opt=='delete':
-		feed.execute('delete from techfeeds where feed_no='+request.form['feedNo'])
+		feedData.execute('delete from techfeeds where feed_no='+request.form['feedNo'])
+		info = "feed deleted"
 	elif opt=='update':
-		feed.execute("""update techfeeds set feed_links = ? ,tags = ? ,summary = ? where feed_no = ?""",(request.form['feedLinks'],request.form['tags'],request.form['summary'],request.form['feedNo']))
-	feed.commit()
-	return render_template('db_table.html',data=retrive(create_connection(path+'/Database/techfeeds.db'),'techfeeds'))
+		feedData.execute("""update techfeeds set feed_links = ? ,tags = ? ,summary = ? where feed_no = ?""",(request.form['feedLinks'],request.form['tags'],request.form['summary'],request.form['feedNo']))
+		info = "feed updated"
+	feedData.commit()
+	return render_template('db_table.html',data=retrive(feedData,'techfeeds'),info=info)
+
 if __name__== "__main__":
 	config()
 	app.run()
