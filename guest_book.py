@@ -66,7 +66,7 @@ def check(ran,links):
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	msg=Message('hello '+user_value[1],sender="feed at",recipients=[user_value[2]])
 	#msg.body="Title:"+feed_vlaue[2]+"\nSummary:"+feed_vlaue[3]+'\nLinke:'+feed_vlaue[1]
-	msg.html=render_template('email_template.html',title1=feed_vlaue1[2],title2=feed_vlaue2[2],summary1=feed_vlaue1[3],summary2=feed_vlaue2[3],feed_link1=feed_vlaue1[1],feed_link2=feed_vlaue2[1])
+	msg.html=render_template('email_template.html',title1=feed_vlaue1[3],title2=feed_vlaue2[3],summary1=feed_vlaue1[4],summary2=feed_vlaue2[4],feed_link1=feed_vlaue1[1],feed_link2=feed_vlaue2[1])
 	mail.send(msg)
 
 @app.route('/')
