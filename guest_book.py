@@ -138,7 +138,7 @@ def add():
 		feedData.execute('delete from techfeeds where feed_no='+request.form['feedNo'])
 		info = "feed deleted"
 	elif opt=='update':
-		feedData.execute("""update techfeeds set feed_links = ? ,tags = ? ,summary = ? where feed_no = ?""",(request.form['feedLinks'],request.form['tags'],request.form['summary'],request.form['feedNo']))
+		feedData.execute("""update techfeeds set feed_links = ? ,tags = ?,title = ?,summary = ? where feed_no = ?""",(request.form['feedLinks'],request.form['tags'],request.form['titles'],request.form['summary'],request.form['feedNo']))
 		info = "feed updated"
 	feedData.commit()
 	return render_template('db_table.html',data=retrive(feedData,'techfeeds'),info=info)
