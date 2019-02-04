@@ -17,23 +17,50 @@ def config():
 	app.config['MAIL_USE_SSL'] = True
 	mail=Mail(app)
 
-def retrive(data,table_name,something_else=''):
-		data=data.execute("select * from "+table_name+something_else)
-		return data.fetchall()
 
-# def randsend(data,table_name):
-# 	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name)
-# 	feeds=feeds.fetchall()
-# 	ran=random.randrange(feeds[0][1],feeds[0][0])
-# 	final=data.execute("select * from "+table_name+" where feed_no="+str(ran))
-# 	final=final.fetchall()
-# 	return final
-#def check(ran,username):
-#	try:
-#		userData = create_connection(path+'/Database/userdata.db')
-#		userData.execute('create table history(si int,)')
-#def randsend(data,table_name):
-#	return randomfetch(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
+def retrive(data,table_name,something_else=''):
+	data=data.execute("select * from "+table_name+something_else)
+	return data.fetchall()
+
+def randsend(data,table_name):
+	feeds=data.execute("select max(feed_no),min(feed_no) from "+table_name)
+	feeds=feeds.fetchall()
+	loop_feed=data.execute("select count(feed_no) from "+table_name)
+	loop_feed=loop_feed.fetchall()
+	email=[]
+	print(loop_feed[0])
+	for j in range(loop_feed[0]):
+		ran=random.randrange(feeds[0][1],feeds[0][0])
+		final=data.execute("select * from "+table_name+" where feed_no="+str(ran))
+		final=final.fetchall()
+		email.append(final)
+	print(email)
+	while check(email[0],email[1])==False:
+		if check(email[0],email[1])==True:
+			return email
+			break
+		else:
+			ran=random.randrange(feeds[0][1],feeds[0][0])
+			final=data.execute("select feed_no,feed_links from "+table_name+" where feed_no="+str(ran))
+			final=final.fetchall()
+			check(email[0],email[1])
+
+	return email
+	
+	
+def check(ran,links):
+	try:
+		userData.execute('create table history(si integer primary key,links varchar(20))')
+	except:
+		try:
+			userData.execute('insert into history(si,links) values(?,?)',(ran,links))
+			userData.commit()
+			return True
+		except:
+			return False
+		
+
+
 		
 	
 def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
@@ -62,35 +89,35 @@ def result():
 
 @app.route('/send')
 def send():
-	# feed_vlaue=randsend(create_connection(path+'/Database/techfeeds.db'),'techfeeds')
-	# users=create_connection(path+'/Database/userdata.db')
-	# for i in range(0,len(feed_vlaue),2):
-	# 	maxim=users.execute('select max(time) from user where last='+str(i))
-	# 	maxim=maxim.fetchall()
-	# 	min,sec=0,0
-	# 	while min<maxim[0][0]:
-	# 		if sec==60:
-	# 			min+=1
-	# 			sec=0
-	# 			for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')'):
-	# 				if user_value != '':
-	# 					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i])
-	# 					value=create_connection(path+'/Database/userdata.db')
-	# 					value.execute('update user set last='+str(feed_vlaue[i][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
-	# 					value.commit()
-	# 					print('Done')
+	 feed_vlaue=randsend(feedData,'techfeeds')
+	 users=userData
+	 for i in range(0,len(feed_vlaue),2):
+	 	maxim=users.execute('select max(time) from user where last='+str(i))
+	 	maxim=maxim.fetchall()
+	 	min,sec=0,0
+	 	while min<maxim[0][0]:
+	 		if sec==60:
+	 			min+=1
+	 			sec=0
+	 			for user_value in retrive(users,'user',' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')'):
+	 				if user_value != '':
+	 					mail_sender(user_value,feed_vlaue[i],feed_vlaue[i])
+	 					value=userData
+	 					value.execute('update user set last='+str(feed_vlaue[i][0])+' where (last<'+str(feed_vlaue[i][0])+' and time='+str(min)+')')
+	 					value.commit()
+	 					print('Done')
 
-	# 		sec+=1
-	# 		time.sleep(1)
-	# 		print('{}min:{}sec'.format(min,sec))
-	return "thank you"
+	 		sec+=1
+	 		time.sleep(1)
+	 		print('{}min:{}sec'.format(min,sec))
+	 return "thank you"
 
 @app.route('/admin')
 def admin():
 	return render_template('adminSignin.html')
 
 @app.route('/j_acegi_security_check',methods=['GET','POST'])
-def check():
+def Check():
 	if request.form['j_username']=='admin' and request.form['j_password']=='admin':
 		Data=retrive(feedData,'techfeeds')
 		return render_template('db_table.html',data=Data)
