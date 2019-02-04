@@ -130,7 +130,7 @@ def add():
 	if opt=='add':
 		test=feedData.execute("""select * from techfeeds where feed_links = ?""",[request.form['feedLinks']])
 		if len(test.fetchall()) == 0:
-			feedData.execute('insert into techfeeds(feed_links,tags,summary) values(?,?,?)',(request.form['feedLinks'],request.form['tags'],request.form['summary']))		
+			feedData.execute('insert into techfeeds(feed_links,title,tags,summary) values(?,?,?,?)',(request.form['feedLinks'],request.form['titles'],request.form['tags'],request.form['summary']))		
 			info = "new feed inserted"
 		else:
 			return render_template('db_table.html',info="feed link already existing",data=retrive(feedData,'techfeeds'))
