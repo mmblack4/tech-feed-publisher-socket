@@ -8,7 +8,6 @@ mail=Mail(app)
 
 userData = sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/userdata.db',check_same_thread=False)
 feedData= sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/techfeeds.db',check_same_thread=False)
-history= sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/history.db',check_same_thread=False)
 
 def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -25,15 +24,15 @@ def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 	mail.send(msg)
 
 def insertData(userID,feedNo):
-	if len((history.execute("select user"+str(userID)+" from history where user"+str(userID)+"="+str(feedNo))).fetchall()) == 0:
-		history.execute("insert into history(si,user"+str(userID)+") values(?,?)",(userID,feedNo))
+	if len((userData.execute("select user"+str(userID)+" from history where user"+str(userID)+"="+str(feedNo))).fetchall()) == 0:
+		userData.execute("insert into history(si,user"+str(userID)+") values(?,?)",(userID,feedNo))
 		return feedNo
 	else:
 		return False
 	
 
 def createColounm(userID,feedNo):
-	history.execute("alter table history add user"+str(+userID)+" int")
+	userData.execute("alter table history add user"+str(+userID)+" int")
 	
 def checkHitory(userID,feedNo):
 	try:
@@ -52,7 +51,7 @@ def check(userID,Range):
 		if ans > 0:
 			return ans
 		elif ans == False:
-			historylenth=(history.execute("select count(user"+str(userID)+") from history where user"+str(userID)+" is not null") ).fetchall()
+			historylenth=(userData.execute("select count(user"+str(userID)+") from history where user"+str(userID)+" is not null") ).fetchall()
 			feedlenth=(feedData.execute("select count(feed_no) from techfeeds")).fetchall()
 			if historylenth[0][0] >= feedlenth[0][0]:
 				return "stop"
@@ -73,12 +72,12 @@ def send():
 						break
 					elif  ans > 0:
 						feed.append((feedData.execute("select * from techfeeds where feed_no = ?",[ans]).fetchall()))
-						history.commit()
+						userData.commit()
 				if len(feed)==2:
 					mail_sender(user,feed[0][0],feed[1][0])
 					print("done")
 					interval=(userData.execute("""select time,next from user where si= ?""",[user[0]])).fetchall()
-					userData.execute("""update user set next= ? where si= ?""",[str((datetime.strptime(interval[0][1], "%Y-%m-%d %H:%M:%S.%f"))+timedelta(minutes=int(interval[0][0]))),user[0]])
+					userData.execute("""update user set next= ? where si= ?""",[str(datetime.today()+timedelta(minutes=int(interval[0][0]))),user[0]])
 					userData.commit()
 					break
 		time.sleep(1)		
