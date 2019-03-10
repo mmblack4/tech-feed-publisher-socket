@@ -6,8 +6,7 @@ import sqlite3,time,os,random
 app = Flask(__name__)
 mail=Mail(app)
 
-userData = sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/userdata.db',check_same_thread=False)
-feedData= sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/techfeeds.db',check_same_thread=False)
+Data= sqlite3.connect(os.path.abspath(os.path.dirname(__file__))+'/Database/techfeeds.db',check_same_thread=False)
 
 def config():
 	app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -59,29 +58,30 @@ def check(userID,Range):
 
 @app.route('/')
 def send():
-	while True:
-		users = (userData.execute("""select * from user where next<= ?""",[str(datetime.today())])).fetchall()
-		if len(users)!=0:
-			for user in users:
-				feed=[]
-				print(user)
-				while len(feed)<2:
-					Range = (feedData.execute("select min(feed_no),max(feed_no) from techfeeds")).fetchall()
-					ans = check(user[0],Range)
-					if ans == "stop":
-						break
-					elif  ans > 0:
-						feed.append((feedData.execute("select * from techfeeds where feed_no = ?",[ans]).fetchall()))
-						userData.commit()
-				if len(feed)==2:
-					mail_sender(user,feed[0][0],feed[1][0])
-					print("done")
-					interval=(userData.execute("""select time,next from user where si= ?""",[user[0]])).fetchall()
-					userData.execute("""update user set next= ? where si= ?""",[str(datetime.today()+timedelta(minutes=int(interval[0][0]))),user[0]])
-					userData.commit()
-					break
-		time.sleep(1)		
-	return "thank"
+	return "hello world!"
+# 	while True:
+# 		users = (userData.execute("""select * from user where next<= ?""",[str(datetime.today())])).fetchall()
+# 		if len(users)!=0:
+# 			for user in users:
+# 				feed=[]
+# 				print(user)
+# 				while len(feed)<2:
+# 					Range = (feedData.execute("select min(feed_no),max(feed_no) from techfeeds")).fetchall()
+# 					ans = check(user[0],Range)
+# 					if ans == "stop":
+# 						break
+# 					elif  ans > 0:
+# 						feed.append((feedData.execute("select * from techfeeds where feed_no = ?",[ans]).fetchall()))
+# 						userData.commit()
+# 				if len(feed)==2:
+# 					mail_sender(user,feed[0][0],feed[1][0])
+# 					print("done")
+# 					interval=(userData.execute("""select time,next from user where si= ?""",[user[0]])).fetchall()
+# 					userData.execute("""update user set next= ? where si= ?""",[str(datetime.today()+timedelta(minutes=int(interval[0][0]))),user[0]])
+# 					userData.commit()
+# 					break
+# 		time.sleep(1)		
+# 	return "thank"
 if __name__ == "__main__":
 	config()
 	app.run(port=5001)
