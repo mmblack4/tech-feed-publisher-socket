@@ -23,11 +23,11 @@ def subscribe():
 @app.route('/result',methods=['GET','POST'])
 def result():
 	try:
-		Data.execute('CREATE TABLE user(si integer primary key,name varchar(20),email varchar(50),start_Datetime datetime,interval int,next_feed datetime,subscribe int,tag varchar(10))')
+		Data.execute('CREATE TABLE user(si integer primary key,name varchar(20),email varchar(50),start_Datetime datetime,interval int,next_feed datetime,subscribe int,tag varchar(10),title varchar(20))')
 	except:
 		pass
 	presTime=datetime.today()
-	Data.execute('INSERT INTO user(name,email,start_Datetime,interval,next_feed,subscribe,tag) VALUES(?,?,?,?,?,?,?)',(request.form['username'],request.form['email_id'],str(presTime),request.form['time'],str(presTime+timedelta(minutes=int(request.form['time']))),1,request.form['tag']))
+	Data.execute('INSERT INTO user(name,email,start_Datetime,interval,next_feed,subscribe,tag,title) VALUES(?,?,?,?,?,?,?,?)',(request.form['username'],request.form['email_id'],str(presTime),request.form['time'],str(presTime+timedelta(minutes=int(request.form['time']))),1,request.form['tag'],request.form['title']))
 	Data.commit()
 	return render_template('result.html')	
 
@@ -60,7 +60,7 @@ def add():
 			Data.execute('insert into feed(feed_links,titles,tags,summary) values(?,?,?,?)',(request.form['feedLinks1'],request.form['titles1'],request.form['tags1'],request.form['summary1']))		
 			info = "new feed inserted"
 		else:
-			return render_template('db_table.html',info="feed link already existing",data=retrive(feedData,'techfeeds'))
+			return render_template('db_table.html',info="feed link already existing",data=retrive(Data,'techfeeds'))
 	elif opt=='delete':
 		Data.execute('delete from feed where feed_no='+request.form['feedNo'])
 		info = "feed deleted"

@@ -22,13 +22,16 @@
                <i> <div class="w3-blue">
                     <form action="/result" class="form-inline" method=post >
                     User name:<br>
-                    <input type="text" class="form-control"name="username" value="{{request.form.username}}">
+                    <input type="text" class="form-control"name="username" >
                     <br>
                     Email id:<br>
-                    <input type="text" class="form-control" name="email_id" value="{{request.form.email_id}}">
+                    <input type="text" class="form-control" name="email_id">
                     <br>
                     tag:<br>
-                    <input type="tag" class="form-control" name="tag">
+                    <input type="text" class="form-control" name="tag">
+                    <br>
+                    title:<br>
+                    <input type="text" class="form-control" name="title">
                     <br>
                     Time:<br>
                     <input type="number" class="form-control" name="time" min="1" max="1440">
