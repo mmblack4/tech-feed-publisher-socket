@@ -1,9 +1,8 @@
 import requests
-import json
-query = 'java'
-api_url = 'https://api.duckduckgo.com/?q='+query+'&format=json&pretty=1'
-response = requests.get(api_url).json()
-results = response['RelatedTopics']['Fi']
-if results:
-    first_result_url = results[0]['url']
-    print(first_result_url)
+from bs4 import BeautifulSoup
+query =input("What are you wishing to search for")
+url = 'https://duckduckgo.com/html?q='+query
+page=requests.get(url)
+soup = BeautifulSoup(page.text, 'html.parser')
+link=soup.findall("div",class_="result results_links_deep highlight_d result--url-above-snippet")
+print(link)
