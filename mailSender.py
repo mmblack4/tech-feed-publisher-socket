@@ -25,6 +25,7 @@ def mail_sender(user_value,feed_vlaue1,feed_vlaue2):
 def checkHitory(userID,feedNo):
 	supervisor=(Data.execute("""select * from history where user_ID=? and feed_No=?""",[userID,feedNo])).fetchall()
 	if len(supervisor)==0:
+		Data.execute("""insert into history(feed_No,user_ID,Date_and_time) values(?,?,?)""",[feedNo,userID,str(datetime.today())])
 		return feedNo
 	else:
 		return 0
