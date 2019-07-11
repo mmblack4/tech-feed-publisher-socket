@@ -6,7 +6,7 @@ user:
     interval
     next_feed
     subscribe
-    tag
+    tags
 
 feed:
     feed_no (pk)
