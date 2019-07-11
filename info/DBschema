@@ -1,0 +1,21 @@
+user:
+    id (pk)
+    name
+    email
+    start_datetime
+    interval
+    next_feed
+    subscribe
+    tag
+
+feed:
+    feed_no (pk)
+    feed_links 
+    tags
+    titles
+    summary
+
+history:
+    feed_no (feed.feed_No)
+    user_id (user.id)
+    date_and_time
