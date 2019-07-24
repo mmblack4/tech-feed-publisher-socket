@@ -1,6 +1,6 @@
 [![HitCount](http://hits.dwyl.io/teamtact/https://github.com/teamtact/tech-feed-publisher-socket.svg)](http://hits.dwyl.io/teamtact/https://github.com/teamtact/tech-feed-publisher-socket)
 
-Tech feed publisher is an web based server application.
+ Tech feed publisher is an web based server application.
 
 This application redirects you to an web page where you can enter your username and email-id and subscribe to the page.
 This email id will be stored in the database.
